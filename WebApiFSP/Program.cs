@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+
 using WepApiFSP.Data.Models;
 using WepApiFSP.Data.Repositories;
 
@@ -10,8 +10,6 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<BookContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("conn")));
 builder.Services.AddTransient<BookContext>();
 builder.Services.AddTransient<IBookRepository,BookRepository>();
 var app = builder.Build();

@@ -1,9 +1,8 @@
-﻿
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text;
 using WepApiFSP.Data.Models;
-using System.Linq.Dynamic.Core ;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
 
 namespace WepApiFSP.Data.Repositories;
 
@@ -36,31 +35,41 @@ public class BookRepository : IBookRepository
         }
 
         // sorting
-        // sort = title,-year  (title by asc and year by desc)
+        // sort=title,-year
+        // (arrange order title ascending and year descending
         if (!string.IsNullOrWhiteSpace(sort))
         {
-            var sortFields = sort.Split(',');  // [title,-year]
+            var sortFields = sort.Split(','); // ['title','-year']
             StringBuilder orderQueryBuilder = new StringBuilder();
             // using reflection to get properties of book
+            // propertyInfo= [Id,Title,Year,Author,Language] 
             PropertyInfo[] propertyInfo = typeof(Book).GetProperties();
+
 
             foreach (var field in sortFields)
             {
+                // iteration 1, field=title
+                // iteration 2, field=-year
                 string sortOrder = "ascending";
-                var sortField = field.Trim();
+                // iteration 1, sortField= title
+                // iteration 2, sortField=-year
+                var sortField = field.Trim(); 
                 if (sortField.StartsWith("-"))
                 {
                     sortField = sortField.TrimStart('-');
                     sortOrder = "descending";
                 }
-                // propertyInfo = [Title,Year]
+                // property = 'Title'
+                // property = 'Year'
                 var property = propertyInfo.FirstOrDefault(a => a.Name.Equals(sortField, StringComparison.OrdinalIgnoreCase));
                 if (property == null)
                     continue;
-                // Title ascending, Year descending
+                // orderQueryBuilder= "Title ascending,Year descending, "
+                // it have trailing , and whitespace
                 orderQueryBuilder.Append($"{property.Name.ToString()} {sortOrder}, ");
             }
-            // orderQuery= Title ascending, Year descending
+            // remove trailing , and whitespace here
+            // orderQuery = ""Title ascending,Year descending"
             string orderQuery = orderQueryBuilder.ToString().TrimEnd(',', ' ');
             if (!string.IsNullOrWhiteSpace(orderQuery))
                 // use System.Linq.Dynamic.Core namespace for this
@@ -70,13 +79,15 @@ public class BookRepository : IBookRepository
         }
 
         // apply pagination
+        
         // totalCount=101 ,page=1,limit=10 (10 record per page)
         var totalCount = await _bookContext.Books.CountAsync();  //101
         // 101/10 = 10.1->11 
         var totalPages = (int)Math.Ceiling(totalCount / (double)limit);
-        // pag1=1 , (1-1)*10=0, skip 0, take 10
-        // page 2, (2-1)*10=10, take(10)
-        // page 3, (3-1)*10=20, take(10)
+
+        // page=1 , skip=(1-1)*10=0, take=10
+        // page=2 , skip=(2-1)*10=10, take=10
+        // page=3 , skip=(3-1)*10=20, take=10
         var pagedBooks = await books.Skip((page - 1) * limit).Take(limit).ToListAsync();
 
         var pagedBookData = new PagedBookResult
