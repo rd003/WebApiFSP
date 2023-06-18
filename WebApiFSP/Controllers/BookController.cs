@@ -9,10 +9,12 @@ namespace WebApiFSP.Controllers
     public class BookController : ControllerBase
     {
         private readonly IBookRepository _bookRepo;
-
-        public BookController(IBookRepository bookRepo)
+        private readonly ILogger<BookController> _logger;
+        public BookController(IBookRepository bookRepo, ILogger<BookController> logger)
         {
             _bookRepo = bookRepo;
+            _logger = logger;
+            _logger.LogDebug("Nlog is integrated to Book Controller");
         }
         [HttpGet]
         public async Task<IActionResult> GetBooks(string? term, string? sort, int page = 1, int limit = 10)
@@ -25,6 +27,24 @@ namespace WebApiFSP.Controllers
             return Ok(bookResult.Books);
         }
 
+        [HttpPost]
+        public IActionResult Create()
+        {
+            try
+            {
+                int a = 10;
+                int s = a / 0;
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(500);
+            }
+        }
+
 
     }
+
+
 }
